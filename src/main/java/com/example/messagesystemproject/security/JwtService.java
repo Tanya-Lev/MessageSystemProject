@@ -96,7 +96,7 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    // Достаём все данные из токена
+    // Внутренний метод: достаём все данные из токена
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(getSigningKey())
@@ -109,5 +109,20 @@ public class JwtService {
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSigningKey);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public static String stripBearerPrefix(String token) {
+        if (token == null || !token.startsWith("Bearer ")) {
+            System.out.println(token);
+            throw new IllegalArgumentException("Invalid Authorization header format. Expected header to start with 'Bearer '.");
+        }
+        return token.substring(7);
+    }
+
+    public String getUserIdFromToken(String token) {
+        String stripped = stripBearerPrefix(token);
+        String userId = extractClaim(stripped, claims -> claims.get("id", String.class));
+        if (userId == null) throw new RuntimeException("Missing user ID in token");
+        return userId;
     }
 }

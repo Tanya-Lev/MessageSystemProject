@@ -20,17 +20,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse whoAmI(String accessToken) {
+        String userId = jwtService.getUserIdFromToken(accessToken);
 
-            accessToken = accessToken.substring(7);
-
-
-        // Извлекаем ID из claims
-        String userId = jwtService.extractClaim(accessToken, claims -> claims.get("id", String.class));
-        if (userId == null) {
-            throw new RuntimeException("Invalid JWT token: missing user ID");
-        }
-
-        //String id = jwtService.extractAllClaims(accessToken.substring(7)).get("Id").toString();
         User user = userRepository.findByLogin(userId)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 

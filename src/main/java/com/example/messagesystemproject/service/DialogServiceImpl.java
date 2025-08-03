@@ -6,35 +6,44 @@ import com.example.messagesystemproject.entity.Dialog;
 import com.example.messagesystemproject.repository.DialogRepository;
 import com.example.messagesystemproject.repository.UserRepository;
 import com.example.messagesystemproject.security.JwtService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DialogServiceImpl implements DialogService {
-    @Autowired
-    private DialogRepository dialogRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private JwtService jwtService;
+
+    private final DialogRepository dialogRepository;
+
+    private final UserRepository userRepository;
+
+    private final JwtService jwtService;
 
     @Override
     public CreateDialogResponse createDialog(String accessToken, CreateDialogRequest request) {
 
-        accessToken = accessToken.substring(7);
+        String userId = jwtService.getUserIdFromToken(accessToken);
 
+        // Проверка, существует ли пользователь-создатель
 
-        String userId = jwtService.extractClaim(accessToken, claims -> claims.get("id", String.class));
-        if (userId == null) {
-            throw new RuntimeException("Invalid JWT token: missing user ID");
-        }
         if (!userId.equals(request.parentUserId())) {
             throw new RuntimeException("Invalid parent UserId!");
         }
-        //во первых в parentUserId передаётся действительно id юзера, который создает диалог
-        //todo во вторых что в usersIdList передают существующих юзеров.
+
+        // Проверка, существуют ли все участники
+        List<String> usersIdList = request.usersIdList();
+        List<String> missingUsersId = usersIdList.stream()
+                .filter(id -> !userRepository.existsById(id))// отфильтровываем только те ID, которых нет в базе (ищем отсутствующих пользователей)
+                .toList();// список ID, которые отсутствуют в базе.
+
+        // Если список отсутствующих пользователей не пустой — значит, кто-то передал ID, которых не существует в системе
+        if (!missingUsersId.isEmpty()) {
+            throw new IllegalArgumentException("Некоторые пользователи не найдены: " + missingUsersId);
+        }
+
 
         Dialog dialog = Dialog.builder()
                 .dialogTitle(request.dialogTitle())

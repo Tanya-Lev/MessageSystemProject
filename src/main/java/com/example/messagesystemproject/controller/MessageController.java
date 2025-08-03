@@ -1,8 +1,8 @@
 package com.example.messagesystemproject.controller;
 
-import com.example.messagesystemproject.dto.request.CreateDialogRequest;
-import com.example.messagesystemproject.dto.response.CreateDialogResponse;
-import com.example.messagesystemproject.service.DialogService;
+import com.example.messagesystemproject.dto.request.CreateMessageRequest;
+import com.example.messagesystemproject.dto.response.CreateMessageResponse;
+import com.example.messagesystemproject.service.MessageService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,15 +13,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/dialogs")
-public class DialogController {
+@RequestMapping("/messages")
+public class MessageController {
     @Autowired
-    private DialogService dialogService;
+    private MessageService messageService;
 
     @PostMapping("/create")
     @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "bearerAuth")
-    public CreateDialogResponse createDialog(HttpServletRequest httpRequest, @RequestBody CreateDialogRequest request){
-        return dialogService.createDialog(httpRequest.getHeader("Authorization"), request);
+    public CreateMessageResponse createDialog(HttpServletRequest httpRequest, @RequestBody CreateMessageRequest request){
+        return messageService.createMessage(httpRequest.getHeader("Authorization"), request);
     }
 }
