@@ -2,6 +2,7 @@ package com.example.messagesystemproject.service;
 
 import com.example.messagesystemproject.dto.request.CreateMessageRequest;
 import com.example.messagesystemproject.dto.response.CreateMessageResponse;
+import com.example.messagesystemproject.dto.response.GetAllMessagesByDialogIdResponse;
 import com.example.messagesystemproject.entity.Dialog;
 import com.example.messagesystemproject.entity.Message;
 import com.example.messagesystemproject.repository.DialogRepository;
@@ -12,6 +13,9 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +25,8 @@ public class MessageServiceImpl implements MessageService {
 
     private final UserRepository userRepository;
 
-    private final JwtService jwtService;;
+    private final JwtService jwtService;
+    ;
 
     @Override
     public CreateMessageResponse createMessage(String accessToken, CreateMessageRequest request) {
@@ -49,5 +54,28 @@ public class MessageServiceImpl implements MessageService {
         dialogRepository.save(dialog);
 
         return new CreateMessageResponse(message.getMessageId().toString());
+    }
+
+    @Override
+    public List<GetAllMessagesByDialogIdResponse> getAllMessagesByDialogId(String accessToken, String id) {
+
+        Dialog dialog = dialogRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Диалог не найден"));
+
+        List<Message> messageList = dialog.getMessages();
+
+        messageList.sort(Comparator.comparing(Message::getDateTime).reversed());
+
+        List<GetAllMessagesByDialogIdResponse> responseList = new ArrayList<>();
+        for (Message message : messageList) {
+            GetAllMessagesByDialogIdResponse response = GetAllMessagesByDialogIdResponse.builder()
+                    .messageId(message.getMessageId().toString())
+                    .dateTime(message.getDateTime())
+                    .textMessage(message.getTextMessage())
+                    .build();
+            responseList.add(response);
+        }
+
+        return responseList;
     }
 }

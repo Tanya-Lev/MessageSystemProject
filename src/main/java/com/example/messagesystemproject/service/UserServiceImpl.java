@@ -22,7 +22,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse whoAmI(String accessToken) {
         String userId = jwtService.getUserIdFromToken(accessToken);
 
-        User user = userRepository.findByLogin(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
         return UserResponse.builder()

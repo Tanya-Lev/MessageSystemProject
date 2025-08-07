@@ -19,7 +19,8 @@ public record CreateDialogRequest(
         String parentUserId,
 
         @Schema(description = "usersIdList")
-        @NotNull
+        @NotNull(message = "usersIdList не может быть null")
+        @Size(min = 1, message = "usersIdList должен содержать хотя бы одного пользователя")
         List<String> usersIdList
 ) {
 }

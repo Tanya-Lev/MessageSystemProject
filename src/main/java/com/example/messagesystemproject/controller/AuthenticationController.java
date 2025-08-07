@@ -33,7 +33,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh-token")
-    public JwtAuthenticationResponse refreshToken(RefreshTokenRequest request) throws IOException {
+    public JwtAuthenticationResponse refreshToken(@Valid RefreshTokenRequest request) throws IOException {
         return authenticationService.refreshToken(request);
     }
 }

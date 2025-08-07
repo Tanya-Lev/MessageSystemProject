@@ -23,7 +23,7 @@ public class JwtService {
     @Value("${token.signing.key}")
     private String jwtSigningKey;
     @Value("${token.access.expiration}")
-    private long accessExpiration;
+    private long accessExpiration;//todo поменять token.access.expiration=900000
     @Value("${token.refresh.expiration}")
     private long refreshExpiration;
 

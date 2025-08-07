@@ -14,7 +14,8 @@ import java.time.LocalDateTime;
 public class Message {
     @Id
     ObjectId messageId;
-    private String userId;
+    private String userId; //отправитель
     private LocalDateTime dateTime;
     private String textMessage;
+
 }
