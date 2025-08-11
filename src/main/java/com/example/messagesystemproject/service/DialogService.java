@@ -7,6 +7,7 @@ import com.example.messagesystemproject.dto.response.GetAllDialogsByUserIdRespon
 import java.util.List;
 
 public interface DialogService {
+
     public CreateDialogResponse createDialog(String accessToken, CreateDialogRequest request);
 
     public List<GetAllDialogsByUserIdResponse> getAllDialogsByUserId(String accessToken);

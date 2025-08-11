@@ -20,9 +20,4 @@ public class Dialog {
     private String dialogTitle;
     private String parentUserId;
     private List<String> usersIdList;
-    private List<Message> messages;
-
-    public boolean addMessage(Message message){
-        return messages.add(message);
-    }
 }

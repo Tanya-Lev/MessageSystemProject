@@ -9,5 +9,8 @@ public interface DialogRepository extends MongoRepository<Dialog, String> {
     //Ищет документы, у которых поле usersIdList содержит указанный userId.
     List<Dialog> findAllByUsersIdListContaining(String userId);
 
+    //Проверка, что документ с таким dialogId существует и при этом usersIdList содержит userId.
+    boolean existsByDialogIdAndUsersIdListContaining(String dialogId, String userId);
+
 
 }

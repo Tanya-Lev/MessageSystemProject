@@ -4,23 +4,26 @@ import com.example.messagesystemproject.dto.request.CreateDialogRequest;
 import com.example.messagesystemproject.dto.response.CreateDialogResponse;
 import com.example.messagesystemproject.dto.response.GetAllDialogsByUserIdResponse;
 import com.example.messagesystemproject.entity.Dialog;
+import com.example.messagesystemproject.entity.Message;
 import com.example.messagesystemproject.repository.DialogRepository;
+import com.example.messagesystemproject.repository.MessageRepository;
 import com.example.messagesystemproject.repository.UserRepository;
 import com.example.messagesystemproject.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class DialogServiceImpl implements DialogService {
 
+    private final UserRepository userRepository;
+
     private final DialogRepository dialogRepository;
 
-    private final UserRepository userRepository;
+    private final MessageRepository messageRepository;
 
     private final JwtService jwtService;
 
@@ -53,7 +56,6 @@ public class DialogServiceImpl implements DialogService {
                 .dialogTitle(request.dialogTitle())
                 .parentUserId(request.parentUserId())
                 .usersIdList(usersIdList)
-                .messages(Collections.emptyList())
                 .build();
 
         Dialog savedDialog = dialogRepository.save(dialog);
@@ -67,21 +69,26 @@ public class DialogServiceImpl implements DialogService {
     public List<GetAllDialogsByUserIdResponse> getAllDialogsByUserId(String accessToken) {
         String userId = jwtService.getUserIdFromToken(accessToken);
 
+        // Получаем все диалоги, где участвует этот пользователь
         List<Dialog> dialogList = dialogRepository.findAllByUsersIdListContaining(userId);
 
         List<GetAllDialogsByUserIdResponse> responseList = new ArrayList<>();
 
         for (Dialog dialog : dialogList) {
-            String lastMessage = dialog.getMessages().isEmpty()
-                    ? "Переписка пуста!"  // или null — в зависимости от требований
-                    : dialog.getMessages().getLast().getTextMessage();
+            // Находим последнее сообщение по этому диалогу (одно, самое новое)
+            Message lastMessage = messageRepository.findFirstByDialogIdOrderByDateTimeDesc(dialog.getDialogId().toString()).orElse(null);
+
+            // Берём текст или ставим дефолт
+            String lastMessageText = (lastMessage != null)
+                    ? lastMessage.getTextMessage()
+                    : "Переписка пуста!";
 
             GetAllDialogsByUserIdResponse response = GetAllDialogsByUserIdResponse.builder()
                     .dialogId(dialog.getDialogId().toString())
                     .dialogTitle(dialog.getDialogTitle())
                     .parentUserId(dialog.getParentUserId())
                     .usersIdList(dialog.getUsersIdList())
-                    .lastMessage(lastMessage)
+                    .lastMessage(lastMessageText)
                     .build();
 
             responseList.add(response);
